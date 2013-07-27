@@ -47,10 +47,6 @@ ga_automater = function(options) {
 
   });
 
-
-
-
-
   //This code runs once per page. It checks other submits.
   //Liked the solution of letting the form submit, putting in local cookie
   //Once page is loaded snag the cookie then log it.

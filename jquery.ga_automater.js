@@ -8,9 +8,12 @@ ga_automater = function(options) {
     file_extensions: ['pdf', 'zip', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'],
     target:''}, options);
 
+  
+  
   log_event = function(event,value){
-    if (typeof(ga) != 'undefined') {
-        ga('send', 'event', event, value);
+    if (typeof(_gaq) != 'undefined') {
+        //ga('send', 'event', event, value);
+        _gaq.push(['_trackEvent', event, value, value]);
     }else if(console != undefined){
       console.log('Google Analytics not found');
       console.log(event+ "***"+value);
@@ -22,29 +25,39 @@ ga_automater = function(options) {
   for (x in settings.file_extensions){      
     $('a[href$="'+settings.file_extensions[x]+'"]').attr("target","_blank").click(function(){
       log_event('file_viewed',$(this).text());
-    })
+    });
   }
 
   //#2 SET EVENT TO FORM SUBMISSIONS
   //Logs the form action of any submitted forms. Doesn't actual log until subsequent page loads.
   $('form').submit(function(){
-    setDelayedEvent($(this).attr('action'),'submitted')
+    setDelayedEvent($(this).attr('action'),'submitted');
   });
   
+  $('.ModFormMasterC .btn').click(function(){
+    setDelayedEvent('form_master submitted', window.location.href);
+  });
+
   //#3 LOGS AND OPENS ANY OFFSITE LINKS IN A NEW WINDOW
   //A little computationally heavy since we loop through each anchor tag
   $('a').each(function() {
      var a = new RegExp('/' + window.location.host + '/');
      if(this.href.match(/^mailto\:/i)){
-        log_event(this.href,'email clicked');
+        $(this).click(function(){
+           log_event('email clicked',this.href);
+        });       
      }
      else if(this.href.match(/^tel\:/i)){
-        log_event(this.href,'telephone clicked');
+        $(this).click(function(){      
+          log_event('telephone clicked',this.href);
+        });
      }     
-     else if (!a.test(this.href)) {
+     else if (!a.test(this.href) && this.href.indexOf('javascript') == -1) {        
         $(this).addClass('ga_external_link').attr("target","_blank");
+        $(this).click(function(){
+          log_event('external site clicked',this.href);
+        });        
      }
-
   });
 
   //This code runs once per page. It checks other submits.
